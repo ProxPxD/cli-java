@@ -90,20 +90,22 @@ public class Command {
     }
 
     public boolean isOfArity(int arity) {
-        return arities.contains(arity);
+        return arities.contains(-1) || arities.contains(arity);
+    }
+
+    public Command setPossibleArities(Integer... arities){
+        this.arities = Arrays.asList(arities);
+        return this;
     }
 
     public void addAction(ThrowingConsumer<String[]> action) {
-        addAction(action, 0);
+        addAction(-1, action);
     }
 
-    public void addAction(ThrowingConsumer<String[]> action, int arity) {
-        addAction(action, new Integer[]{arity});
-    }
-
-    public void addAction(ThrowingConsumer<String[]> action, Integer... arities) {
+    public Command addAction(int arity, ThrowingConsumer<String[]> action){
+        setPossibleArities(arity);
         this.action = action;
-        this.arities = Arrays.asList(arities);
+        return this;
     }
 
     public void execute(String... args) {
@@ -152,8 +154,8 @@ public class Command {
     }
 
     String getCommandNamesString() {
-        String string = names.stream().reduce("", (s, n) -> s + n + ", ");
-        return string.substring(0, string.length() - 2);
+        String string = names.stream().reduce("", (s, n) -> s + ", " + n);
+        return string.substring(2);
     }
 
     private String spaces(int n) {

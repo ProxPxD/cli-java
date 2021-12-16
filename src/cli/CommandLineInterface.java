@@ -3,6 +3,9 @@ package cli;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 public class CommandLineInterface  extends Command{
@@ -11,7 +14,12 @@ public class CommandLineInterface  extends Command{
     private PrintStream printer;
     private final State state = new State();
     private String instruction;
+    private String[] arguments;
     private Command help = new Command("--help");
+
+    public CommandLineInterface(){
+        super("CLI");
+    }
 
     @Override
     protected boolean isCli(){
@@ -54,35 +62,28 @@ public class CommandLineInterface  extends Command{
     }
 
     public void executeInstruction() {
+        splitInstruction();
         Command command = findCommandToExecute();
         //TODO handle options
-        String[] args = splitInstructionIntoParameters();
-        if (command.isExecutable() && command.isOfArity(args.length))
-            command.execute(args);
+        if (command.isExecutable() && command.isOfArity(arguments.length))
+            command.execute(arguments);
         else
             command.printHelp(printer);
     }
 
     private Command findCommandToExecute() {
         Command currentCommand = this;
-        String commandName = splitInstruction();
-        while (currentCommand.hasCommand(commandName)) {
-            currentCommand = currentCommand.getCommand(commandName);
-            commandName = splitInstruction();
+        int i = 0;
+        while (i < arguments.length && currentCommand.hasCommand(arguments[i])) {
+            currentCommand = currentCommand.getCommand(arguments[i++]);
         }
+        arguments = Arrays.copyOfRange(arguments, i, arguments.length);
         return currentCommand;
     }
 
-    private String splitInstruction() {
-        String[] split = instruction.split(" ", 2);
-        instruction = split.length > 1 ? split[1] : "";
-        return split[0];
+    private void splitInstruction(){
+        arguments = instruction.split(" ");
     }
-
-    private String[] splitInstructionIntoParameters() {
-        return instruction.split(" ");
-    }
-
 
     public void printState() {
         printer.println(state);

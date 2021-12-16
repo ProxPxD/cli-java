@@ -33,6 +33,10 @@ public class ApplicationManager {
         cli.executeInstruction();
     }
 
+    public void printState(){
+        cli.printState();
+    }
+
     private void createCli() {
         initCli();
         initCliOptions();
@@ -53,13 +57,13 @@ public class ApplicationManager {
     private void initCliAddOption() {
         Command add = cli.addCommand(Constants.ADD).setDescription(Constants.ADD_DESCRIPTION);
         Command addLang = add.addCommand(Constants.LANGUAGE, Constants.LANG).setDescription(Constants.ADD_LANGUAGE_DESCRIPTION);
-        addLang.addAction(args -> {cli.setStateValue(Constants.LANGUAGE, args[0]);});
+        addLang.addAction(1, args -> {cli.setStateValue(Constants.LANGUAGE, args[0]);});
     }
 
     private void initCliSetOption() {
         Command set = cli.addCommand(Constants.SET).setDescription(Constants.SET_DESCRIPTION);
         Command setLang = set.addCommand(Constants.LANGUAGE, Constants.LANG).setDescription(Constants.SET_LANG_DESCRIPTION);
-        setLang.addAction(args -> cli.setStateValue(Constants.LANGUAGE, args[0]));
+        setLang.addAction(1, args -> cli.setStateValue(Constants.LANGUAGE, args[0]));
     }
 
     private void initCliExitOption() {
