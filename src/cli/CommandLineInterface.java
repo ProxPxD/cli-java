@@ -5,30 +5,21 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
 
-public class CommandLineInterface {
+public class CommandLineInterface  extends Command{
 
     private Scanner scanner;
     private PrintStream printer;
     private final State state = new State();
     private String instruction;
-    private final Command root = new Command("root");
     private Command help = new Command("--help");
 
-    public Command addCommand(String... names) {
-        return root.addCommand(names);
+    @Override
+    protected boolean isCli(){
+        return true;
     }
-
-    public Command addCommand(Command command) {
-        return root.addCommand(command);
-    }
-
-    public Command getCommand(String name) {
-        return root.getCommand(name);
-    }
-
     public void setHelpOptions(String... names) {
         help = new Command(names);
-        root.updateHelp(help, printer);
+        updateHelp(help, printer);
     }
 
     public void setStateValue(String variable, String value) {
@@ -46,6 +37,11 @@ public class CommandLineInterface {
     public void setOutputStream(OutputStream out) {
         printer = new PrintStream(out);
     }
+
+    PrintStream getPrinter(){
+        return printer;
+    }
+
 
     public void readInstruction() {
         if (scanner == null)
@@ -68,7 +64,7 @@ public class CommandLineInterface {
     }
 
     private Command findCommandToExecute() {
-        Command currentCommand = root;
+        Command currentCommand = this;
         String commandName = splitInstruction();
         while (currentCommand.hasCommand(commandName)) {
             currentCommand = currentCommand.getCommand(commandName);

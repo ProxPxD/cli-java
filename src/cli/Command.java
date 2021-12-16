@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Command {
 
@@ -18,6 +19,7 @@ public class Command {
     private final List<String> names;
     @Getter
     private String description = "";
+    private Command parent;
     private final List<Command> commands = new ArrayList<>();
     private Consumer<String[]> action;
     private List<Integer> arities = new ArrayList<>();
@@ -35,6 +37,26 @@ public class Command {
         action = command.action;
         arities = command.arities;
         description = command.description;
+        parent = null;
+    }
+
+    void setParent(Command parent) {
+        this.parent = parent;
+    }
+
+    public Command getParent() {
+        return parent;
+    }
+
+    public CommandLineInterface getCli(){
+        Command currParent = parent;
+        while (!currParent.isCli())
+            currParent = currParent.getParent();
+        return (CommandLineInterface) currParent;
+    }
+
+    protected boolean isCli(){
+        return false;
     }
 
     public Command addCommand(String... names) {
@@ -46,6 +68,7 @@ public class Command {
     }
 
     public Command addCommand(Command command) {
+        command.setParent(this);
         commands.add(command);
         return command;
     }
@@ -88,25 +111,35 @@ public class Command {
         action.accept(args);
     }
 
-    public void updateHelp(Command help, PrintStream printer) {
+    public void updateHelp(Command help){
+        updateHelp(help, getCli().getPrinter());
+    }
+
+    void updateHelp(Command help, PrintStream printer) {
         Command ownHelp = addCommand(help.names);
         ownHelp.addAction(args -> printHelp(printer));
         commands.forEach(command -> command.updateHelp(help, printer));
     }
 
     void printHelp(PrintStream printer) {
+        printInfoAboutSelf(printer);
+        printSubCommands(printer);
+    }
+
+    private void printInfoAboutSelf(PrintStream printer){
         String commandNames = getCommandNamesString();
-        List<String> subcommandsNames = commands.stream().map(Command::getCommandNamesString).collect(Collectors.toList());
-        int maxLength = subcommandsNames.stream().map(String::length).max(Integer::compareTo).orElse(0);
         printer.println(commandNames);
         if (description.length() > 0)
             printer.println(description);
         printer.println();
-        List<String> subcommandsNamesWithSpaces = subcommandsNames.stream().map(s -> s + spaces(maxLength + spaceStrip - s.length())).collect(Collectors.toList());
-        for(int i = 0; i < commands.size(); i++){
-            printer.print(subcommandsNamesWithSpaces.get(i));
-            printer.println(commands.get(i).getDescription());
-        }
+    }
+
+    private void printSubCommands(PrintStream printer){
+        Stream<String> names = commands.stream().map(Command::getCommandNamesString);
+        int maxLength = names.map(String::length).max(Integer::compareTo).orElse(0);
+        List<String> namesWithSpaces = names.map(s -> s + spaces(maxLength + spaceStrip - s.length())).collect(Collectors.toList());
+        Stream<String> namesWithDescriptions = IntStream.range(0, commands.size()).mapToObj(i -> namesWithSpaces.get(i) + commands.get(i).getDescription());
+        namesWithDescriptions.forEach(printer::println);
     }
 
     String getCommandNamesString() {
