@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class Command {
 
@@ -135,17 +134,21 @@ public class Command {
     }
 
     private void printSubCommands(PrintStream printer){
-        List<String> namesWithSpaces = getCommandNamesWithSpaces();
-        List<String> namesWithDescriptions = IntStream.range(0, commands.size())
-                .mapToObj(i -> namesWithSpaces.get(i) + commands.get(i).getDescription())
-                .collect(Collectors.toList());
+        List<String> names = commands.stream().map(Command::getCommandNamesString).collect(Collectors.toList());
+        List<String> namesWithSpaces = putSpaces(names);
+        List<String> namesWithDescriptions = putDescriptions(namesWithSpaces);
         namesWithDescriptions.forEach(printer::println);
     }
 
-    private List<String> getCommandNamesWithSpaces(){
-        Stream<String> names = commands.stream().map(Command::getCommandNamesString);
-        int maxLength = names.map(String::length).max(Integer::compareTo).orElse(0);
-        return names.map(s -> s + spaces(maxLength + spaceStrip - s.length())).collect(Collectors.toList());
+    private List<String> putSpaces(List<String> list){
+        int maxLength = list.stream().map(String::length).max(Integer::compareTo).orElse(0);
+        return list.stream().map(s -> s + spaces(maxLength + spaceStrip - s.length())).collect(Collectors.toList());
+    }
+
+    private List<String> putDescriptions(List<String> list){
+        return IntStream.range(0, commands.size())
+                .mapToObj(i -> list.get(i) + commands.get(i).getDescription())
+                .collect(Collectors.toList());
     }
 
     String getCommandNamesString() {
