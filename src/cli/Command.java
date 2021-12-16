@@ -135,11 +135,17 @@ public class Command {
     }
 
     private void printSubCommands(PrintStream printer){
+        List<String> namesWithSpaces = getCommandNamesWithSpaces();
+        List<String> namesWithDescriptions = IntStream.range(0, commands.size())
+                .mapToObj(i -> namesWithSpaces.get(i) + commands.get(i).getDescription())
+                .collect(Collectors.toList());
+        namesWithDescriptions.forEach(printer::println);
+    }
+
+    private List<String> getCommandNamesWithSpaces(){
         Stream<String> names = commands.stream().map(Command::getCommandNamesString);
         int maxLength = names.map(String::length).max(Integer::compareTo).orElse(0);
-        List<String> namesWithSpaces = names.map(s -> s + spaces(maxLength + spaceStrip - s.length())).collect(Collectors.toList());
-        Stream<String> namesWithDescriptions = IntStream.range(0, commands.size()).mapToObj(i -> namesWithSpaces.get(i) + commands.get(i).getDescription());
-        namesWithDescriptions.forEach(printer::println);
+        return names.map(s -> s + spaces(maxLength + spaceStrip - s.length())).collect(Collectors.toList());
     }
 
     String getCommandNamesString() {
