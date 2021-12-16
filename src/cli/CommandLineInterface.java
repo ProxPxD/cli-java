@@ -1,4 +1,4 @@
-package src.cli;
+package cli;
 
 import java.io.InputStream;
 import java.io.OutputStream;

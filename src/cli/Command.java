@@ -1,4 +1,4 @@
-package src.cli;
+package cli;
 
 import lombok.Getter;
 
