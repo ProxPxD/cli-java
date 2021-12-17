@@ -22,9 +22,7 @@ public class Command {
     private String description = "";
     private Command parent;
     private final List<Command> commands = new ArrayList<>();
-    private HashMap<Integer, Consumer<String[]>> actions;
-//    private Consumer<String[]> action;
-//    private List<Integer> arities = new ArrayList<>();
+    private Map<Integer, Consumer<String[]>> actions = new HashMap<>();
 
     public Command(String... names) {
         this.names = List.of(names);
@@ -37,7 +35,6 @@ public class Command {
     public Command(Command command) {
         names = command.names;
         actions = command.actions;
-//        arities = command.arities;
         description = command.description;
         parent = null;
     }
