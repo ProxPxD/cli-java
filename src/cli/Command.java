@@ -3,10 +3,7 @@ package cli;
 import lombok.Getter;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -14,14 +11,20 @@ import java.util.stream.IntStream;
 public class Command {
 
     private static final int spaceStrip = 5;
+    public static final int customArity = -1;
+
+    private static final String NO_ACTION_AT_ADDING_ARITIES = "The actions is not set. There's nothing that can have the arity. Pleases add an action first";
+    private static final String TOO_MANY_ACTIONS_WHILE_SETTING_ARITIES = "It's ambiguous what action, should have which arity. Please reconsider setting proper arities to particular actions or making one action with multiple arities";
+
 
     private final List<String> names;
     @Getter
     private String description = "";
     private Command parent;
     private final List<Command> commands = new ArrayList<>();
-    private Consumer<String[]> action;
-    private List<Integer> arities = new ArrayList<>();
+    private HashMap<Integer, Consumer<String[]>> actions;
+//    private Consumer<String[]> action;
+//    private List<Integer> arities = new ArrayList<>();
 
     public Command(String... names) {
         this.names = List.of(names);
@@ -33,8 +36,8 @@ public class Command {
 
     public Command(Command command) {
         names = command.names;
-        action = command.action;
-        arities = command.arities;
+        actions = command.actions;
+//        arities = command.arities;
         description = command.description;
         parent = null;
     }
@@ -86,30 +89,53 @@ public class Command {
     }
 
     public boolean isExecutable() {
-        return action != null;
+        return !actions.isEmpty();
     }
 
     public boolean isOfArity(int arity) {
-        return arities.contains(-1) || arities.contains(arity);
+        return actions.containsKey(arity) || actions.containsKey(customArity);
     }
 
-    public Command setPossibleArities(Integer... arities){
-        this.arities = Arrays.asList(arities);
+    public Command setPossibleArities(Integer... arities){ // TODO idea: allow more things
+        if (actions.isEmpty())
+            throw new IllegalStateException(NO_ACTION_AT_ADDING_ARITIES);
+        if (actions.size() > 1)
+            throw new IllegalStateException(TOO_MANY_ACTIONS_WHILE_SETTING_ARITIES);
+
+        Consumer<String[]> action = actions.values().stream().findFirst().get();
+        actions.clear();
+        for(int arity: arities) {
+            actions.put(arity, action);
+        }
         return this;
     }
 
-    public void addAction(ThrowingConsumer<String[]> action) {
-        addAction(-1, action);
+    public Command setAction(ThrowingConsumer<String[]> action){
+        return setAction(customArity, action);
+    }
+
+    public Command setAction(int arity, ThrowingConsumer<String[]> action){
+        actions.clear();
+        return addAction(arity, action);
+    }
+
+    public Command addAction(ThrowingConsumer<String[]> action) {
+        return addAction(customArity, action);
     }
 
     public Command addAction(int arity, ThrowingConsumer<String[]> action){
-        setPossibleArities(arity);
-        this.action = action;
+        if (actions.containsKey(arity))
+            throw new IllegalArgumentException("That arity already exists");
+        else
+            actions.put(arity, action);
         return this;
     }
 
     public void execute(String... args) {
-        action.accept(args);
+        if (actions.containsKey(args.length))
+            actions.get(args.length).accept(args);
+        else if (actions.containsKey(customArity))
+            actions.get(customArity).accept(args);
     }
 
     public void updateHelp(Command help){
