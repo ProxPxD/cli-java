@@ -52,6 +52,9 @@ public class CommandLineInterface  extends Command{
         return printer;
     }
 
+    public void printState() {
+        printer.println(state);
+    }
 
     public void readInstruction() {
         if (scanner == null)
@@ -68,13 +71,14 @@ public class CommandLineInterface  extends Command{
     }
 
     public void executeInstruction() {
-        splitInstruction();
+        arguments = splitInstruction();
         Command command = findCommandToExecute();
         //TODO handle options
-        if (command.isExecutable() && command.isOfArity(arguments.length))
-            command.execute(arguments);
-        else
-            command.printHelp(printer);
+        handleExecution(command);
+    }
+
+    private String[] splitInstruction(){
+        return instruction.split(" ");
     }
 
     private Command findCommandToExecute() {
@@ -87,11 +91,10 @@ public class CommandLineInterface  extends Command{
         return currentCommand;
     }
 
-    private void splitInstruction(){
-        arguments = instruction.split(" ");
-    }
-
-    public void printState() {
-        printer.println(state);
+    private void handleExecution(Command command){
+        if (command.isExecutable() && command.isOfArity(arguments.length))
+            command.execute(arguments);
+        else
+            command.printHelp(printer);
     }
 }
