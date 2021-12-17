@@ -87,8 +87,12 @@ public class CommandLineInterface  extends Command{
         while (i < arguments.length && currentCommand.hasCommand(arguments[i])) {
             currentCommand = currentCommand.getCommand(arguments[i++]);
         }
-        arguments = Arrays.copyOfRange(arguments, i, arguments.length);
+        arguments = cutCommandsFromArguments(i);
         return currentCommand;
+    }
+
+    private String[] cutCommandsFromArguments(int from){
+        return Arrays.copyOfRange(arguments, from, arguments.length);
     }
 
     private void handleExecution(Command command){
