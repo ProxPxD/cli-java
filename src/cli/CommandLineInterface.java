@@ -3,9 +3,7 @@ package cli;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 
 public class CommandLineInterface  extends Command{
@@ -63,6 +61,10 @@ public class CommandLineInterface  extends Command{
 
     public void readInstruction(Scanner sc) {
         instruction = sc.nextLine();
+    }
+
+    public void putInstruction(String instruction){
+        this.instruction = instruction;
     }
 
     public void executeInstruction() {
