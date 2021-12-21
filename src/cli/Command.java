@@ -93,7 +93,6 @@ public class Command {
         if (actions.containsKey(arity) || actions.containsKey(customArity))
             return true;
         // TODO: static func
-        // TODO: add limit of adding custom arities at addAction
         var customArity = getCustomArgumentArity();
         return customArity.isPresent() && customArity.get() >= arity;
     }
@@ -128,6 +127,8 @@ public class Command {
     public Command addAction(int arity, ThrowingConsumer<String[]> action){
         if (actions.containsKey(arity))
             throw new IllegalArgumentException("That arity already exists");
+        if (arity < 0 && getCustomArgumentArity().isPresent())
+            throw new IllegalArgumentException("A custom arity already exists");
         else
             actions.put(arity, action);
         return this;
