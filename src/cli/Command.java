@@ -90,7 +90,12 @@ public class Command {
     }
 
     public boolean isOfArity(int arity) {
-        return actions.containsKey(arity) || actions.containsKey(customArity);
+        if (actions.containsKey(arity) || actions.containsKey(customArity))
+            return true;
+        // TODO: static func
+        // TODO: limit number of possible negatives arities to one
+        Set<Integer> negativeArities = actions.keySet().stream().filter(k -> k < 0).map(k -> -(k+1)).collect(Collectors.toSet());
+        return negativeArities.stream().anyMatch(a -> arity >= a);
     }
 
     public Command setPossibleArities(Integer... arities){ // TODO idea: allow more things
