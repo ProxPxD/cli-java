@@ -1,14 +1,12 @@
 package cli;
 
-import lombok.Getter;
-
 import java.io.PrintStream;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class Command {
+public class Command extends AbstractCommand {
 
     private static final int spaceStrip = 5;
     public static final int customArity = -1;
@@ -16,20 +14,17 @@ public class Command {
     private static final String NO_ACTION_AT_ADDING_ARITIES = "The actions is not set. There's nothing that can have the arity. Pleases add an action first";
     private static final String TOO_MANY_ACTIONS_WHILE_SETTING_ARITIES = "It's ambiguous what action, should have which arity. Please reconsider setting proper arities to particular actions or making one action with multiple arities";
 
-
-    private final List<String> names;
-    @Getter
-    private String description = "";
     private Command parent;
     private final List<Command> commands = new ArrayList<>();
+    final List<Option> options = new ArrayList<>();
     private Map<Integer, Consumer<String[]>> actions = new HashMap<>();
 
-    public Command(String... names) {
-        this.names = List.of(names);
+    public Command(String... names){
+        super(names);
     }
 
     public Command(Collection<String> names) {
-        this.names = new ArrayList<>(names);
+        super(names);
     }
 
     public Command(Command command) {
@@ -58,6 +53,10 @@ public class Command {
         return false;
     }
 
+    void clear(){
+        options.forEach(Option::setToDefault);
+    }
+
     public Command addCommand(String... names) {
         return addCommand(new Command(names));
     }
@@ -80,6 +79,23 @@ public class Command {
         return commands.stream().filter(c -> c.names.contains(name)).findFirst().orElseThrow();
     }
 
+    public Option addOption(String... names){
+        return addOption(new Option(names));
+    }
+
+    public Option addOption(Collection<String> names) {
+        return addOption(new Option(names));
+    }
+
+    public Option addOption(Option option){
+        options.add(option);
+        return option;
+    }
+
+    public String getOptionValue(String name){
+        return options.stream().filter(o -> o.names.contains(name)).findAny().map(Option::get).orElse("");
+    }
+
     public Command setDescription(String description) {
         this.description = description;
         return this;
@@ -92,7 +108,6 @@ public class Command {
     public boolean isOfArity(int arity) {
         if (actions.containsKey(arity) || actions.containsKey(customArity))
             return true;
-        // TODO: static func
         var customArity = getCustomArgumentArity();
         return customArity.isPresent() && customArity.get() >= arity;
     }

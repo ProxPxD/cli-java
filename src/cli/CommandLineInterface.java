@@ -3,8 +3,7 @@ package cli;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.Arrays;
-import java.util.Scanner;
+import java.util.*;
 
 public class CommandLineInterface  extends Command{
 
@@ -73,8 +72,33 @@ public class CommandLineInterface  extends Command{
     public void executeInstruction() {
         arguments = splitInstruction();
         Command command = findCommandToExecute();
-        //TODO handle options
+        setOptionsFor(command);
         handleExecution(command);
+        command.clear();
+    }
+
+    private void setOptionsFor(Command command){
+        List<Integer> optionIndices = new ArrayList<>();
+        for(int i = 0; i < arguments.length; i++){
+            int j = i;
+            Optional<Option> correspondingOption = command.options.stream().filter(option -> option.names.contains(arguments[j])).findAny();
+            if (correspondingOption.isPresent()){
+                correspondingOption.get().set(arguments[j+1]);
+                optionIndices.add(i++);
+            }
+        }
+        removeIndicesFromArguments(optionIndices);
+    }
+
+    private void removeIndicesFromArguments(List<Integer> indices){
+        List<String> arguments = Arrays.asList(this.arguments);
+        int i = indices.size();
+        while (i > 0){
+            int index = indices.get(--i);
+            arguments.remove(index+1);
+            arguments.remove(index);
+        }
+        this.arguments = arguments.toArray(new String[]{});
     }
 
     private String[] splitInstruction(){
