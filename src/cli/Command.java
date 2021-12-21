@@ -93,9 +93,9 @@ public class Command {
         if (actions.containsKey(arity) || actions.containsKey(customArity))
             return true;
         // TODO: static func
-        // TODO: limit number of possible negatives arities to one
-        Set<Integer> negativeArities = actions.keySet().stream().filter(k -> k < 0).map(k -> -(k+1)).collect(Collectors.toSet());
-        return negativeArities.stream().anyMatch(a -> arity >= a);
+        // TODO: add limit of adding custom arities at addAction
+        var customArity = getCustomArgumentArity();
+        return customArity.isPresent() && customArity.get() >= arity;
     }
 
     public Command setPossibleArities(Integer... arities){ // TODO idea: allow more things
@@ -138,6 +138,10 @@ public class Command {
             actions.get(args.length).accept(args);
         else if (actions.containsKey(customArity))
             actions.get(customArity).accept(args);
+        Optional<Integer> arity = getCustomArgumentArity();
+        if (arity.isPresent() && arity.get() <= args.length){
+            actions.get(mapArityKey(arity.get())).accept(args);
+        }
     }
 
     public void updateHelp(Command help){
@@ -188,5 +192,13 @@ public class Command {
 
     private String spaces(int n) {
         return IntStream.range(0, n).mapToObj(i -> " ").reduce("", String::concat);
+    }
+
+    private Optional<Integer> getCustomArgumentArity(){
+        return actions.keySet().stream().filter(a -> a < 0).map(Command::mapArityKey).findFirst();
+    }
+
+    private static int mapArityKey(int value){
+        return -(value+1);
     }
 }
