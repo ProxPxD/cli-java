@@ -138,9 +138,11 @@ public class Command {
             actions.get(args.length).accept(args);
         else if (actions.containsKey(customArity))
             actions.get(customArity).accept(args);
-        Optional<Integer> arity = getCustomArgumentArity();
-        if (arity.isPresent() && arity.get() <= args.length){
-            actions.get(mapArityKey(arity.get())).accept(args);
+        else {
+            Optional<Integer> arity = getCustomArgumentArity();
+            if (arity.isPresent() && arity.get() <= args.length) {
+                actions.get(mapArityKey(arity.get())).accept(args);
+            }
         }
     }
 

@@ -45,7 +45,7 @@ public class CommandLineInterface  extends Command{
     }
 
     public void print(Object message){
-        printer.println(message.toString());
+        printer.println(message);
     }
 
     PrintStream getPrinter(){
