@@ -151,7 +151,7 @@ public class Command extends AbstractCommand {
         return setAction(customArity, action);
     }
 
-    public Command setAction(int arity, ThrowingConsumer<String[]> action){
+    public Command setAction(int arity, ThrowingConsumer<String[]> action) {
         actions.clear();
         return addAction(arity, action);
     }
@@ -160,7 +160,11 @@ public class Command extends AbstractCommand {
         return addAction(customArity, action);
     }
 
-    public Command addAction(int arity, ThrowingConsumer<String[]> action){
+    public void addAction(List<Integer> arities, ThrowingConsumer<String[]> action) {
+        arities.forEach(a -> addAction(a, action));
+    }
+
+    public Command addAction(int arity, ThrowingConsumer<String[]> action) {
         if (actions.containsKey(arity))
             throw new IllegalArgumentException("That arity already exists");
         if (arity < 0 && getCustomArgumentArity().isPresent())
