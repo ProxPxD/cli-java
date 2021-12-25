@@ -174,8 +174,10 @@ public class Command extends AbstractCommand {
 
     void printHelp(PrintStream printer) {
         printInfoAboutSelf(printer);
-        printOptions(printer);
-        printSubCommands(printer);
+        if (!options.isEmpty())
+            printOptions(printer);
+        if (!commands.isEmpty())
+            printSubCommands(printer);
     }
 
     private void printInfoAboutSelf(PrintStream printer){
@@ -192,33 +194,28 @@ public class Command extends AbstractCommand {
         printer.println();
     }
 
-    private void printSubCommands(PrintStream printer){
+    private void printSubCommands(PrintStream printer) {
         printer.println(COMMANDS);
         printCommandsWithSpaces(printer, commands);
         printer.println();
     }
 
-    private void printCommandsWithSpaces(PrintStream printer, List<AbstractCommand> commands){
-        List<String> names = commands.stream().map(Command::getCommandNamesString).collect(Collectors.toList());
+    private void printCommandsWithSpaces(PrintStream printer, List<? extends AbstractCommand> commands) {
+        List<String> names = commands.stream().map(AbstractCommand::getCommandNamesString).collect(Collectors.toList());
         List<String> namesWithSpaces = putSpaces(names);
-        List<String> namesWithDescriptions = putDescriptions(namesWithSpaces);
+        List<String> namesWithDescriptions = putDescriptions(namesWithSpaces, commands);
         namesWithDescriptions.forEach(printer::println);
     }
 
-    private List<String> putSpaces(List<String> list){
+    private List<String> putSpaces(List<String> list) {
         int maxLength = list.stream().map(String::length).max(Integer::compareTo).orElse(0);
         return list.stream().map(s -> s + spaces(maxLength + spaceStrip - s.length())).collect(Collectors.toList());
     }
 
-    private List<String> putDescriptions(List<String> list){
+    private List<String> putDescriptions(List<String> list, List<? extends AbstractCommand> commands) {
         return IntStream.range(0, commands.size())
                 .mapToObj(i -> list.get(i) + commands.get(i).getDescription())
                 .collect(Collectors.toList());
-    }
-
-    String getCommandNamesString() {
-        String string = names.stream().reduce("", (s, n) -> s + ", " + n);
-        return string.substring(2);
     }
 
     private String spaces(int n) {

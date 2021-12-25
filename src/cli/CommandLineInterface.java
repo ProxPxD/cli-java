@@ -12,7 +12,7 @@ public class CommandLineInterface  extends Command{
     private final State state = new State();
     private String instruction;
     private String[] arguments;
-    private Command help = new Command("--help");
+    private Command help = new Command("--help", "-h");
 
     public CommandLineInterface(){
         super("CLI");

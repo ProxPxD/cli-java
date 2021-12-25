@@ -23,4 +23,9 @@ public class AbstractCommand {
         this.names = new ArrayList<>(names);
     }
 
+    String getCommandNamesString() {
+        String string = names.stream().reduce("", (s, n) -> s + ", " + n);
+        return string.substring(2);
+    }
+
 }
