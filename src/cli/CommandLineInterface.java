@@ -12,7 +12,6 @@ public class CommandLineInterface  extends Command{
     private final State state = new State();
     private String instruction;
     private String[] arguments;
-    private Command help = new Command("--help", "-h");
 
     public CommandLineInterface(){
         super("CLI");
@@ -23,8 +22,8 @@ public class CommandLineInterface  extends Command{
         return true;
     }
     public void setHelpOptions(String... names) {
-        help = new Command(names);
-        updateHelp(help, printer);
+        helpNames = names;
+        updateHelp(names, printer);
     }
 
     public void setStateValue(String variable, String value) {

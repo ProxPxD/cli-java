@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class Command extends AbstractCommand {
 
@@ -67,8 +68,27 @@ public class Command extends AbstractCommand {
 
     public Command addCommand(Command command) {
         command.setParent(this);
+        if (!command.isHelp())
+            command.updateHelp(helpNames);
         commands.add(command);
         return command;
+    }
+
+    public void removeCommands(String[] names) {
+        Stream<Command> toRemove = Arrays.stream(names).flatMap(n -> commands.stream().filter(c -> c.names.contains(n)));
+        removeCommands(toRemove);
+    }
+
+    public void removeCommands(Command[] commands) {
+        removeCommands(Arrays.stream(commands));
+    }
+
+    public void removeCommands(Collection<Command> commands) {
+        removeCommands(commands.stream());
+    }
+
+    private void removeCommands(Stream<Command> commands) {
+        commands.forEach(this.commands::remove);
     }
 
     public boolean hasCommand(String name) {
@@ -79,7 +99,7 @@ public class Command extends AbstractCommand {
         return commands.stream().filter(c -> c.names.contains(name)).findFirst().orElseThrow();
     }
 
-    public Option addOption(String... names){
+    public Option addOption(String... names) {
         return addOption(new Option(names));
     }
 
@@ -162,14 +182,27 @@ public class Command extends AbstractCommand {
         }
     }
 
-    public void updateHelp(Command help){
-        updateHelp(help, getCli().getPrinter());
+    public void updateHelp(String[] names) {
+        updateHelp(names, getCli().getPrinter());
     }
 
-    void updateHelp(Command help, PrintStream printer) {
-        Command ownHelp = addCommand(help.names);
-        ownHelp.addAction(args -> printHelp(printer));
-        commands.forEach(command -> command.updateHelp(help, printer));
+    void updateHelp(String[] names, PrintStream printer) {  //TODO make user update help after setting a printer
+        removeCurrentHelp();
+        createNewHelp(names, printer);
+        commands.stream().filter(c -> !c.isHelp()).forEach(command -> command.updateHelp(names, printer));
+    }
+
+    private void removeCurrentHelp() {
+        Stream<Command> currentHelps = commands.stream().filter(AbstractCommand::isHelp);
+        removeCommands(currentHelps);
+    }
+
+    private void createNewHelp(String[] names, PrintStream printer) {
+        helpNames = names;
+        Command help = new Command(helpNames);
+        help.addAction(args -> printHelp(printer));
+        help.setAsHelp();
+        addCommand(help);
     }
 
     void printHelp(PrintStream printer) {
@@ -180,7 +213,7 @@ public class Command extends AbstractCommand {
             printSubCommands(printer);
     }
 
-    private void printInfoAboutSelf(PrintStream printer){
+    private void printInfoAboutSelf(PrintStream printer) {
         String commandNames = getCommandNamesString();
         printer.println(commandNames);
         if (description.length() > 0)

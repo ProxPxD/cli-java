@@ -14,6 +14,8 @@ public class AbstractCommand {
     @Getter
     protected String description = "";
     protected List<String> names;
+    protected boolean isHelp;
+    protected String[] helpNames = new String[]{};
 
     public AbstractCommand(String... names) {
         this.names = List.of(names);
@@ -26,6 +28,14 @@ public class AbstractCommand {
     String getCommandNamesString() {
         String string = names.stream().reduce("", (s, n) -> s + ", " + n);
         return string.substring(2);
+    }
+
+    boolean isHelp() {
+        return isHelp;
+    }
+
+    void setAsHelp() {
+        isHelp = true;
     }
 
 }
