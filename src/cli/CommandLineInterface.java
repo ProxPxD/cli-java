@@ -100,7 +100,7 @@ public class CommandLineInterface  extends Command{
     }
 
     private String[] splitInstruction(){
-        return instruction.split(" ");
+        return instruction.split("\"?( |$)(?=(([^\"]*\"){2})*[^\"]*$)\"?");
     }
 
     private Command findCommandToExecute() {
@@ -108,6 +108,10 @@ public class CommandLineInterface  extends Command{
         int i = 0;
         while (i < arguments.length && currentCommand.hasCommand(arguments[i])) {
             currentCommand = currentCommand.getCommand(arguments[i++]);
+        }
+        if (currentCommand.help.names.contains(arguments[i - 1])) {
+            currentCommand = currentCommand.help;
+            i++;
         }
         arguments = cutCommandsFromArguments(i);
         return currentCommand;

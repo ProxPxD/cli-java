@@ -19,7 +19,7 @@ public class Command extends AbstractCommand {
     private final List<Command> commands = new ArrayList<>();
     final List<Option> options = new ArrayList<>();
     private Map<Integer, Consumer<String[]>> actions = new HashMap<>();
-    private Command help;
+    Command help;
 
     public Command(String... names){
         super(names);
@@ -130,7 +130,7 @@ public class Command extends AbstractCommand {
         if (actions.containsKey(arity) || actions.containsKey(customArity))
             return true;
         var customArity = getCustomArgumentArity();
-        return customArity.isPresent() && customArity.get() >= arity;
+        return customArity.isPresent() && arity >= customArity.get();
     }
 
     public Command setPossibleArities(Integer... arities){ // TODO idea: allow more things
