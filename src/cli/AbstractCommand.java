@@ -8,8 +8,8 @@ import java.util.List;
 
 public class AbstractCommand {
 
-    protected static String OPTIONS = "Options:"
-    protected static String COMMANDS = "Commands:"
+    protected static String OPTIONS = "Options:";
+    protected static String COMMANDS = "Commands:";
 
     @Getter
     protected String description = "";
