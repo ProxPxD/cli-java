@@ -1,15 +1,12 @@
 package cli;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.Collection;
+import java.util.function.Supplier;
 
 public class Option extends AbstractCommand {
 
     private String value = null;
-    @Setter@Getter
-    private String defaultValue;
+    Supplier<String> defaultValueSupplier = () -> "";
 
     public Option(String... names) {
         super(names);
@@ -23,31 +20,25 @@ public class Option extends AbstractCommand {
         this.value = value;
     }
 
-    public String get(){
-        return value == null ? defaultValue: value;
+    public String get() {
+        return value == null ? defaultValueSupplier.get() : value;
     }
 
-    public Option setToDefault(){
-        value = defaultValue;
+    public Option setDefault(String value) {
+        return setDefault(() -> value);
+    }
+
+    public Option setDefault(Supplier<String> supplier) {
+        defaultValueSupplier = supplier;
         return this;
     }
 
-    public Option setDefault(String value){
-        defaultValue = value;
-        return this;
+    @Override
+    public Option setDescription(String description) {
+        return (Option) super.setDescription(description);
     }
 
-    public Option setDefaultIfNotSet(String value){
-        if (isNotSet())
-            setDefault(value);
-        return this;
-    }
-
-    public boolean isSet(){
-        return value != null;
-    }
-
-    public boolean isNotSet(){
-        return !isSet();
+    void clear() {
+        value = null;
     }
 }

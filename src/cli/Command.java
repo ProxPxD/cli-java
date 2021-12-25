@@ -55,7 +55,7 @@ public class Command extends AbstractCommand {
     }
 
     void clear(){
-        options.forEach(Option::setToDefault);
+        options.forEach(Option::clear);
     }
 
     public Command addCommand(String... names) {
@@ -116,9 +116,9 @@ public class Command extends AbstractCommand {
         return options.stream().filter(o -> o.names.contains(name)).findAny().map(Option::get).orElse("");
     }
 
+    @Override
     public Command setDescription(String description) {
-        this.description = description;
-        return this;
+        return (Command) super.setDescription(description);
     }
 
     public boolean isExecutable() {

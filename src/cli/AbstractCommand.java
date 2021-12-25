@@ -38,4 +38,9 @@ public class AbstractCommand {
         isHelp = true;
     }
 
+    public AbstractCommand setDescription(String description) {
+        this.description = description;
+        return this;
+    }
+
 }
