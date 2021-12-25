@@ -19,6 +19,7 @@ public class Command extends AbstractCommand {
     private final List<Command> commands = new ArrayList<>();
     final List<Option> options = new ArrayList<>();
     private Map<Integer, Consumer<String[]>> actions = new HashMap<>();
+    private Command help;
 
     public Command(String... names){
         super(names);
@@ -69,7 +70,7 @@ public class Command extends AbstractCommand {
     public Command addCommand(Command command) {
         command.setParent(this);
         if (!command.isHelp())
-            command.updateHelp(helpNames);
+            command.updateHelp(help.names.toArray(new String[]{}));
         commands.add(command);
         return command;
     }
@@ -172,8 +173,6 @@ public class Command extends AbstractCommand {
     public void execute(String... args) {
         if (actions.containsKey(args.length))
             actions.get(args.length).accept(args);
-        else if (actions.containsKey(customArity))
-            actions.get(customArity).accept(args);
         else {
             Optional<Integer> arity = getCustomArgumentArity();
             if (arity.isPresent() && arity.get() <= args.length) {
@@ -187,22 +186,14 @@ public class Command extends AbstractCommand {
     }
 
     void updateHelp(String[] names, PrintStream printer) {  //TODO make user update help after setting a printer
-        removeCurrentHelp();
         createNewHelp(names, printer);
         commands.stream().filter(c -> !c.isHelp()).forEach(command -> command.updateHelp(names, printer));
     }
 
-    private void removeCurrentHelp() {
-        Stream<Command> currentHelps = commands.stream().filter(AbstractCommand::isHelp);
-        removeCommands(currentHelps);
-    }
-
     private void createNewHelp(String[] names, PrintStream printer) {
-        helpNames = names;
-        Command help = new Command(helpNames);
+        help = new Command(names);
         help.addAction(args -> printHelp(printer));
         help.setAsHelp();
-        addCommand(help);
     }
 
     void printHelp(PrintStream printer) {

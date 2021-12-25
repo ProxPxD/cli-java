@@ -22,7 +22,6 @@ public class CommandLineInterface  extends Command{
         return true;
     }
     public void setHelpOptions(String... names) {
-        helpNames = names;
         updateHelp(names, printer);
     }
 

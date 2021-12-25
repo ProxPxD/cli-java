@@ -15,7 +15,6 @@ public class AbstractCommand {
     protected String description = "";
     protected List<String> names;
     protected boolean isHelp;
-    protected String[] helpNames = new String[]{};
 
     public AbstractCommand(String... names) {
         this.names = List.of(names);
