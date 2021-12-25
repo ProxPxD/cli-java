@@ -89,7 +89,7 @@ public class CommandLineInterface  extends Command{
     }
 
     private void removeIndicesFromArguments(List<Integer> indices){
-        List<String> arguments = Arrays.asList(this.arguments);
+        List<String> arguments = new ArrayList<>(Arrays.asList(this.arguments));
         int i = indices.size();
         while (i > 0){
             int index = indices.get(--i);
