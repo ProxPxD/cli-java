@@ -174,6 +174,7 @@ public class Command extends AbstractCommand {
 
     void printHelp(PrintStream printer) {
         printInfoAboutSelf(printer);
+        printOptions(printer);
         printSubCommands(printer);
     }
 
@@ -185,7 +186,19 @@ public class Command extends AbstractCommand {
         printer.println();
     }
 
+    private void printOptions(PrintStream printer){
+        printer.println(OPTIONS);
+        printCommandsWithSpaces(printer, options);
+        printer.println();
+    }
+
     private void printSubCommands(PrintStream printer){
+        printer.println(COMMANDS);
+        printCommandsWithSpaces(printer, commands);
+        printer.println();
+    }
+
+    private void printCommandsWithSpaces(PrintStream printer, List<AbstractCommand> commands){
         List<String> names = commands.stream().map(Command::getCommandNamesString).collect(Collectors.toList());
         List<String> namesWithSpaces = putSpaces(names);
         List<String> namesWithDescriptions = putDescriptions(namesWithSpaces);
