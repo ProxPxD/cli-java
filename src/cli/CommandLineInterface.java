@@ -109,7 +109,7 @@ public class CommandLineInterface  extends Command{
         while (i < arguments.length && currentCommand.hasCommand(arguments[i])) {
             currentCommand = currentCommand.getCommand(arguments[i++]);
         }
-        if (currentCommand.help.names.contains(arguments[i - 1])) {
+        if (i > 0 && currentCommand.help.names.contains(arguments[i - 1])) {
             currentCommand = currentCommand.help;
             i++;
         }
