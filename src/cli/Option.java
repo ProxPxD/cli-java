@@ -1,11 +1,13 @@
 package cli;
 
 import java.util.Collection;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.function.Supplier;
 
 public class Option extends AbstractCommand {
 
-    private String value = null;
+    private final Queue<String> values = new PriorityQueue<>();
     Supplier<String> defaultValueSupplier = () -> "";
 
     public Option(String... names) {
@@ -16,12 +18,16 @@ public class Option extends AbstractCommand {
         super(names);
     }
 
-    void set(String value){
-        this.value = value;
+    void add(String value) {
+        values.add(value);
+    }
+
+    boolean hasValues() {
+        return !values.isEmpty();
     }
 
     public String get() {
-        return value == null ? defaultValueSupplier.get() : value;
+        return hasValues() ? values.poll() : defaultValueSupplier.get();
     }
 
     public Option setDefault(String value) {
@@ -39,6 +45,6 @@ public class Option extends AbstractCommand {
     }
 
     void clear() {
-        value = null;
+        values.clear();
     }
 }

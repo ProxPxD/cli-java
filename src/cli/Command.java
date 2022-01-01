@@ -1,5 +1,8 @@
 package cli;
 
+import lombok.Builder;
+import lombok.Getter;
+
 import java.io.PrintStream;
 import java.util.*;
 import java.util.function.Consumer;
@@ -18,10 +21,16 @@ public class Command extends AbstractCommand {
     private Command parent;
     private final List<Command> commands = new ArrayList<>();
     final List<Option> options = new ArrayList<>();
+    @Getter
+    List<Option> temporalOptions = new ArrayList<>();
+    @Getter
+    @Builder.Default
+    private boolean temporalOptionsOn = false;
+    List<String> optionPrefixes = new ArrayList<>();
     private Map<Integer, Consumer<String[]>> actions = new HashMap<>();
     Command help;
 
-    public Command(String... names){
+    public Command(String... names) {
         super(names);
     }
 
@@ -36,6 +45,11 @@ public class Command extends AbstractCommand {
         parent = null;
     }
 
+    public Command setTemporalOptionsOn(boolean value) {
+        temporalOptionsOn = value;
+        return this;
+    }
+
     void setParent(Command parent) {
         this.parent = parent;
     }
@@ -44,7 +58,7 @@ public class Command extends AbstractCommand {
         return parent;
     }
 
-    public CommandLineInterface getCli(){
+    public CommandLineInterface getCli() {
         Command currParent = parent;
         while (!currParent.isCli())
             currParent = currParent.getParent();
@@ -108,13 +122,27 @@ public class Command extends AbstractCommand {
         return addOption(new Option(names));
     }
 
-    public Option addOption(Option option){
+    public Option addOption(Option option) {
         options.add(option);
         return option;
     }
 
-    public String getOptionValue(String name){
+    Option addTemporalOption(String... names) {
+        return addTemporalOption(new Option(names));
+    }
+
+    Option addTemporalOption(Option option) {
+        temporalOptions.add(option);
+        return option;
+    }
+
+    public String getOptionValue(String name) {
         return options.stream().filter(o -> o.names.contains(name)).findAny().map(Option::get).orElse("");
+    }
+
+    public Command addOptionPrefix(String prefix) {
+        optionPrefixes.add(prefix);
+        return this;
     }
 
     @Override

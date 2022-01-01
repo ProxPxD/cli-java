@@ -13,6 +13,7 @@ public class AbstractCommand {
 
     @Getter
     protected String description = "";
+    @Getter
     protected List<String> names;
     protected boolean isHelp;
 
@@ -40,6 +41,10 @@ public class AbstractCommand {
     public AbstractCommand setDescription(String description) {
         this.description = description;
         return this;
+    }
+
+    public String getFirstName() {
+        return !names.isEmpty() ? names.get(0) : "";
     }
 
 }

@@ -70,19 +70,27 @@ public class CommandLineInterface  extends Command{
     public void executeInstruction() {
         arguments = splitInstruction();
         Command command = findCommandToExecute();
-        setOptionsFor(command);
+        setOptions(command);
         handleExecution(command);
         command.clear();
     }
 
-    private void setOptionsFor(Command command){
+    private void setOptions(Command command) {
         List<Integer> optionIndices = new ArrayList<>();
-        for(int i = 0; i < arguments.length; i++){
+        for (int i = 0; i < arguments.length; i++) {
             int j = i;
             Optional<Option> correspondingOption = command.options.stream().filter(option -> option.names.contains(arguments[j])).findAny();
-            if (correspondingOption.isPresent()){
-                correspondingOption.get().set(arguments[j+1]);
+            if (correspondingOption.isPresent()) {
+                correspondingOption.get().add(arguments[j + 1]);
                 optionIndices.add(i++);
+            } else if (command.isTemporalOptionsOn()) {
+                Optional<String> prefix = command.optionPrefixes.stream().filter(p -> arguments[j].startsWith(p)).findAny();
+                if (prefix.isPresent()) {
+                    String optionName = arguments[j].substring(prefix.get().length());
+                    Option temporalOption = command.addTemporalOption(optionName);
+                    temporalOption.add(arguments[j + 1]);
+                    optionIndices.add(i++);
+                }
             }
         }
         removeIndicesFromArguments(optionIndices);
